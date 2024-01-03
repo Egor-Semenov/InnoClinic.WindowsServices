@@ -100,25 +100,24 @@ namespace InnoClinic.WindowsServices
             try
             {
                 Log.Information("Fetching emails from the database");
-
-                var connection = new SqlConnection(_sqlConnection);
-                connection.Open();
-
-                var getQuery = "SELECT Email FROM Doctors WHERE DAY(BirthDate) = DAY(GETDATE()) AND MONTH(BirthDate) = MONTH(GETDATE());";
-                var query = new SqlCommand(getQuery, connection);
-
-                var reader = query.ExecuteReader();
-
                 var emails = new List<string>();
 
-                while (reader.Read())
+                using (var connection = new SqlConnection(_sqlConnection))
                 {
-                    emails.Add(reader.GetString(0));
+                    connection.Open();
+
+                    var getQuery = "SELECT Email FROM Doctors WHERE DAY(BirthDate) = DAY(GETDATE()) AND MONTH(BirthDate) = MONTH(GETDATE());";
+                    var query = new SqlCommand(getQuery, connection);
+
+                    var reader = query.ExecuteReader();
+
+                    while (reader.Read())
+                    {
+                        emails.Add(reader.GetString(0));
+                    }
+
+                    Log.Information("Emails fetched successfully.");
                 }
-
-                connection.Close();
-
-                Log.Information("Emails fetched successfully.");
 
                 return emails;
             }
